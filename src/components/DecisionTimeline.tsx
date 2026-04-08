@@ -1,19 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
-import type { HistoryEntry, Emotion } from "@/hooks/useSimulation";
+import type { TrajectoryStep } from "@/hooks/useSimulation";
+import { parseEmotion, getEmoji } from "@/hooks/useSimulation";
 
 interface Props {
-  steps: HistoryEntry[];
+  steps: TrajectoryStep[];
   isRunning: boolean;
   isDone: boolean;
 }
-
-const emotionEmojis: Record<Emotion, string> = {
-  angry: "😡",
-  confused: "😕",
-  calm: "😌",
-  satisfied: "😊",
-  neutral: "🤖",
-};
 
 const actionLabels: Record<string, string> = {
   apologize: "Apologize",
@@ -31,7 +24,7 @@ export default function DecisionTimeline({ steps, isRunning, isDone }: Props) {
         <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground">Decision Timeline</h2>
         {isRunning && (
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-accent glow-dot animate-pulse-glow" />
+            <span className="w-2 h-2 rounded-full bg-accent glow-dot animate-pulse" />
             <span className="text-[10px] font-mono text-accent">ACTIVE</span>
           </div>
         )}
@@ -48,35 +41,44 @@ export default function DecisionTimeline({ steps, isRunning, isDone }: Props) {
         )}
 
         <AnimatePresence>
-          {steps.map((step, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="relative pl-10 pb-5"
-            >
-              <div className={`absolute left-2.5 top-1 w-3 h-3 rounded-full border-2 border-primary bg-background z-10 ${i === steps.length - 1 && isRunning ? "glow-dot text-primary" : ""}`} />
+          {steps.map((step, i) => {
+            const emotionBefore = i > 0 ? parseEmotion(steps[i - 1].observation.emotion) : "neutral";
+            const emotionAfter = parseEmotion(step.observation.emotion);
+            return (
+              <motion.div
+                key={step.step}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="relative pl-10 pb-4"
+              >
+                <div className={`absolute left-2.5 top-1 w-3 h-3 rounded-full border-2 border-primary bg-background z-10 ${i === steps.length - 1 && isRunning ? "glow-dot text-primary" : ""}`} />
 
-              <div className="glass-panel p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono text-muted-foreground">STEP {i + 1}</span>
-                    <span className="text-sm font-semibold text-foreground">{actionLabels[step.action] || step.action}</span>
+                <div className="glass-panel p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono text-muted-foreground">STEP {step.step}</span>
+                      <span className="text-sm font-semibold text-foreground">{actionLabels[step.action] || step.action}</span>
+                    </div>
+                    <motion.span
+                      key={`${step.step}-${step.reward}`}
+                      initial={{ scale: 1.5 }}
+                      animate={{ scale: 1 }}
+                      className={`text-xs font-mono font-bold ${step.reward >= 0 ? "text-accent glow-text-accent" : "text-destructive"}`}
+                    >
+                      {step.reward >= 0 ? "+" : ""}{step.reward.toFixed(2)}
+                    </motion.span>
                   </div>
-                  <span className={`text-xs font-mono ${step.reward >= 0 ? "text-accent" : "text-destructive"}`}>
-                    {step.reward >= 0 ? "+" : ""}{step.reward}
-                  </span>
-                </div>
 
-                <div className="flex items-center gap-2 text-xs">
-                  <span>{emotionEmojis[step.emotionBefore]}</span>
-                  <span className="text-muted-foreground">→</span>
-                  <span>{emotionEmojis[step.emotionAfter]}</span>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span>{getEmoji(emotionBefore)}</span>
+                    <span className="text-muted-foreground">→</span>
+                    <span>{getEmoji(emotionAfter)}</span>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
 
         {steps.length === 0 && !isRunning && (
@@ -88,8 +90,8 @@ export default function DecisionTimeline({ steps, isRunning, isDone }: Props) {
         {steps.length === 0 && isRunning && (
           <div className="flex items-center justify-center h-full">
             <div className="flex items-center gap-2 text-accent">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse-glow" />
-              <span className="text-xs font-mono">Choose an action to begin...</span>
+              <span className="w-2 h-2 rounded-full bg-accent animate-pulse glow-dot" />
+              <span className="text-xs font-mono">Agent is initializing...</span>
             </div>
           </div>
         )}

@@ -1,53 +1,64 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 
 const API_BASE = "http://localhost:8000";
 
 export type Emotion = "angry" | "confused" | "calm" | "satisfied" | "neutral";
-export type ActionType = "apologize" | "clarify" | "gather_info" | "act_now" | "delay" | "ignore";
 
-export interface HistoryEntry {
-  action: ActionType;
+export interface TrajectoryStep {
+  step: number;
+  action: string;
   reward: number;
-  emotionBefore: Emotion;
-  emotionAfter: Emotion;
-  timestamp: number;
+  observation: {
+    message: string;
+    emotion: string;
+    known_facts: string[];
+    unknowns: string[];
+    time_left: number;
+    history: string[];
+  };
+  done: boolean;
 }
 
 export interface SimulationState {
-  message: string;
-  emotion: Emotion;
-  knownFacts: string[];
-  unknowns: string[];
-  timeLeft: number;
-  history: string[];
-  done: boolean;
-  isRunning: boolean;
-  totalScore: number;
-  currentReward: number;
-  quality: "Poor" | "Average" | "Good" | "Excellent";
-  steps: HistoryEntry[];
+  phase: "idle" | "running" | "done";
+  currentStepIndex: number;
+  trajectory: TrajectoryStep[];
+  finalScore: number;
+  success: boolean;
+  stepsTaken: number;
+  totalReward: number;
   isLoading: boolean;
   error: string | null;
+  thinkingText: string;
 }
 
+const thinkingPhrases = [
+  "Analyzing emotional state...",
+  "Evaluating possible actions...",
+  "Reducing uncertainty...",
+  "Weighing trade-offs...",
+  "Considering consequences...",
+  "Processing feedback...",
+  "Adjusting strategy...",
+  "Taking action...",
+  "Reassessing situation...",
+  "Making final decision...",
+];
+
 const initialState: SimulationState = {
-  message: "",
-  emotion: "neutral",
-  knownFacts: [],
-  unknowns: [],
-  timeLeft: 0,
-  history: [],
-  done: false,
-  isRunning: false,
-  totalScore: 0,
-  currentReward: 0,
-  quality: "Poor",
-  steps: [],
+  phase: "idle",
+  currentStepIndex: -1,
+  trajectory: [],
+  finalScore: 0,
+  success: false,
+  stepsTaken: 0,
+  totalReward: 0,
   isLoading: false,
   error: null,
+  thinkingText: "",
 };
 
-function parseEmotion(raw: string): Emotion {
+export function parseEmotion(raw: string): Emotion {
   const lower = raw?.toLowerCase() || "neutral";
   if (lower.includes("angry") || lower.includes("frustrat")) return "angry";
   if (lower.includes("confus")) return "confused";
@@ -56,93 +67,55 @@ function parseEmotion(raw: string): Emotion {
   return "neutral";
 }
 
-function getQuality(score: number): SimulationState["quality"] {
-  if (score >= 80) return "Excellent";
-  if (score >= 50) return "Good";
-  if (score >= 25) return "Average";
-  return "Poor";
-}
-
-function getEmoji(emotion: Emotion): string {
+export function getEmoji(emotion: Emotion): string {
   const map: Record<Emotion, string> = { angry: "😡", confused: "😕", calm: "😌", satisfied: "😊", neutral: "🤖" };
   return map[emotion];
 }
 
-export { getEmoji };
-
 export function useSimulation() {
   const [state, setState] = useState<SimulationState>(initialState);
+  const cancelRef = useRef(false);
 
-  const start = useCallback(async () => {
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+  const run = useCallback(async () => {
+    cancelRef.current = false;
+    setState({ ...initialState, phase: "running", isLoading: true, thinkingText: "Connecting to AI agent..." });
+
     try {
-      const res = await fetch(`${API_BASE}/reset`, { method: "POST" });
-      if (!res.ok) throw new Error(`Reset failed: ${res.status}`);
+      const res = await fetch(`${API_BASE}/run-agent`, { method: "POST" });
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
       const data = await res.json();
-      const emotion = parseEmotion(data.observation.emotion);
-      setState({
-        ...initialState,
-        isRunning: true,
-        message: data.observation.message,
-        emotion,
-        knownFacts: data.observation.known_facts || [],
-        unknowns: data.observation.unknowns || [],
-        timeLeft: data.observation.time_left || 0,
-        history: data.observation.history || [],
-        done: data.done,
-      });
-    } catch (err: any) {
-      setState((prev) => ({ ...prev, isLoading: false, error: err.message }));
-    }
-  }, []);
+      const trajectory: TrajectoryStep[] = data.trajectory || [];
 
-  const step = useCallback(async (actionType: ActionType) => {
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
-    try {
-      const res = await fetch(`${API_BASE}/step`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action_type: actionType }),
-      });
-      if (!res.ok) throw new Error(`Step failed: ${res.status}`);
-      const data = await res.json();
-      const newEmotion = parseEmotion(data.observation.emotion || data.info?.emotion);
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        trajectory,
+        finalScore: data.final_score ?? 0,
+        success: data.success ?? false,
+        stepsTaken: data.steps_taken ?? trajectory.length,
+        totalReward: data.total_reward ?? 0,
+      }));
 
-      setState((prev) => {
-        const reward = data.reward || 0;
-        const newScore = prev.totalScore + reward;
-        const entry: HistoryEntry = {
-          action: actionType,
-          reward,
-          emotionBefore: prev.emotion,
-          emotionAfter: newEmotion,
-          timestamp: Date.now(),
-        };
-        return {
-          ...prev,
-          isLoading: false,
-          message: data.observation.message,
-          emotion: newEmotion,
-          knownFacts: data.observation.known_facts || [],
-          unknowns: data.observation.unknowns || [],
-          timeLeft: data.observation.time_left ?? prev.timeLeft,
-          history: data.observation.history || [],
-          done: data.done,
-          isRunning: !data.done,
-          totalScore: newScore,
-          currentReward: reward,
-          quality: getQuality(newScore),
-          steps: [...prev.steps, entry],
-        };
-      });
+      // Animate steps one by one
+      for (let i = 0; i < trajectory.length; i++) {
+        if (cancelRef.current) break;
+        const thinkingText = thinkingPhrases[i % thinkingPhrases.length];
+        setState(prev => ({ ...prev, thinkingText, currentStepIndex: i }));
+        await new Promise(r => setTimeout(r, 1200));
+      }
+
+      if (!cancelRef.current) {
+        setState(prev => ({ ...prev, phase: "done", thinkingText: "" }));
+      }
     } catch (err: any) {
-      setState((prev) => ({ ...prev, isLoading: false, error: err.message }));
+      setState(prev => ({ ...prev, isLoading: false, phase: "idle", error: err.message }));
     }
   }, []);
 
   const reset = useCallback(() => {
+    cancelRef.current = true;
     setState(initialState);
   }, []);
 
-  return { state, start, step, reset };
+  return { state, run, reset };
 }

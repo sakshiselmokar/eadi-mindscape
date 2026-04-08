@@ -1,67 +1,65 @@
 import { motion } from "framer-motion";
 
 interface Props {
-  currentReward: number;
-  totalScore: number;
-  quality: "Poor" | "Average" | "Good" | "Excellent";
+  totalReward: number;
+  finalScore: number;
+  success: boolean;
   stepCount: number;
   totalSteps: number;
+  phase: "idle" | "running" | "done";
 }
 
-const qualityColors: Record<string, string> = {
-  Poor: "text-destructive",
-  Average: "emotion-confused",
-  Good: "emotion-calm",
-  Excellent: "emotion-satisfied",
-};
-
-export default function MetricsPanel({ currentReward, totalScore, quality, stepCount, totalSteps }: Props) {
+export default function MetricsPanel({ totalReward, finalScore, success, stepCount, totalSteps, phase }: Props) {
   const progress = totalSteps > 0 ? (stepCount / totalSteps) * 100 : 0;
 
   return (
     <div className="glass-panel p-6">
-      <h2 className="text-sm font-mono uppercase tracking-widest text-muted-foreground mb-5 font-bold">📊 Performance Metrics</h2>
+      <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-5">📊 Performance Metrics</h2>
 
       <div className="grid grid-cols-4 gap-6">
-        {/* Current Reward */}
+        {/* Total Reward */}
         <div className="text-center">
-          <span className="text-xs font-mono text-muted-foreground uppercase font-bold">Last Reward</span>
+          <span className="text-[10px] font-mono text-muted-foreground uppercase">Total Reward</span>
           <motion.div
-            key={currentReward}
-            initial={{ scale: 1.4, opacity: 0 }}
+            key={totalReward}
+            initial={{ scale: 1.3, opacity: 0.5 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 300 }}
-            className="text-3xl font-extrabold text-accent font-mono mt-2"
+            className={`text-3xl font-extrabold font-mono mt-2 ${totalReward >= 0 ? "text-accent glow-text-accent" : "text-destructive"}`}
           >
-            {currentReward >= 0 ? "+" : ""}{currentReward.toFixed(2)}
+            {totalReward >= 0 ? "+" : ""}{totalReward.toFixed(2)}
           </motion.div>
         </div>
 
-        {/* Total Score */}
+        {/* Final Score */}
         <div className="text-center">
-          <span className="text-xs font-mono text-muted-foreground uppercase font-bold">Total Score</span>
+          <span className="text-[10px] font-mono text-muted-foreground uppercase">Final Score</span>
           <motion.div
-            key={totalScore}
+            key={finalScore}
             initial={{ scale: 1.2 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 300 }}
             className="text-3xl font-extrabold text-primary font-mono glow-text mt-2"
           >
-            {totalScore.toFixed(2)}
+            {finalScore.toFixed(2)}
           </motion.div>
         </div>
 
-        {/* Quality */}
+        {/* Status */}
         <div className="text-center">
-          <span className="text-xs font-mono text-muted-foreground uppercase font-bold">Quality</span>
-          <div className={`text-3xl font-extrabold font-mono mt-2 ${qualityColors[quality]}`}>
-            {quality}
+          <span className="text-[10px] font-mono text-muted-foreground uppercase">Status</span>
+          <div className={`text-2xl font-extrabold font-mono mt-2 ${
+            phase === "idle" ? "text-muted-foreground" :
+            phase === "running" ? "text-accent glow-text-accent" :
+            success ? "text-emerald-400" : "text-destructive"
+          }`}>
+            {phase === "idle" ? "READY" : phase === "running" ? "LIVE" : success ? "SUCCESS" : "FAILED"}
           </div>
         </div>
 
         {/* Progress */}
         <div>
-          <span className="text-xs font-mono text-muted-foreground uppercase font-bold">Progress</span>
+          <span className="text-[10px] font-mono text-muted-foreground uppercase">Progress</span>
           <div className="mt-3">
             <div className="h-3 rounded-full bg-secondary overflow-hidden">
               <motion.div
@@ -70,9 +68,10 @@ export default function MetricsPanel({ currentReward, totalScore, quality, stepC
                 transition={{ duration: 0.5 }}
               />
             </div>
-            <span className="text-xs font-mono font-bold text-muted-foreground mt-2 block text-right">
-              {progress.toFixed(2)}%
-            </span>
+            <div className="flex justify-between mt-1.5">
+              <span className="text-[10px] font-mono text-muted-foreground">{stepCount}/{totalSteps} steps</span>
+              <span className="text-[10px] font-mono text-muted-foreground">{progress.toFixed(0)}%</span>
+            </div>
           </div>
         </div>
       </div>
