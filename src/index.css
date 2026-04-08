@@ -6,58 +6,58 @@
 
 @layer base {
   :root {
-    --background: 230 25% 7%;
-    --foreground: 220 20% 92%;
+    --background: 235 35% 18%;
+    --foreground: 45 20% 92%;
 
-    --card: 230 25% 10%;
-    --card-foreground: 220 20% 92%;
+    --card: 240 30% 22%;
+    --card-foreground: 45 20% 92%;
 
-    --popover: 230 25% 10%;
-    --popover-foreground: 220 20% 92%;
+    --popover: 240 30% 22%;
+    --popover-foreground: 45 20% 92%;
 
-    --primary: 250 85% 65%;
+    --primary: 280 70% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 230 20% 15%;
-    --secondary-foreground: 220 15% 75%;
+    --secondary: 235 25% 28%;
+    --secondary-foreground: 45 15% 80%;
 
-    --muted: 230 15% 18%;
-    --muted-foreground: 220 10% 50%;
+    --muted: 235 20% 30%;
+    --muted-foreground: 230 15% 60%;
 
-    --accent: 200 95% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 170 80% 50%;
+    --accent-foreground: 235 35% 12%;
 
-    --destructive: 0 75% 55%;
+    --destructive: 0 70% 58%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 230 15% 18%;
-    --input: 230 15% 18%;
-    --ring: 250 85% 65%;
+    --border: 240 20% 30%;
+    --input: 240 20% 30%;
+    --ring: 280 70% 65%;
 
     --radius: 0.75rem;
 
-    --glow-primary: 250 85% 65%;
-    --glow-accent: 200 95% 55%;
-    --emotion-angry: 0 75% 55%;
-    --emotion-confused: 40 90% 55%;
-    --emotion-calm: 200 70% 55%;
-    --emotion-satisfied: 145 65% 50%;
-    --emotion-neutral: 220 15% 55%;
+    --glow-primary: 280 70% 65%;
+    --glow-accent: 170 80% 50%;
+    --emotion-angry: 0 75% 58%;
+    --emotion-confused: 40 90% 60%;
+    --emotion-calm: 200 70% 58%;
+    --emotion-satisfied: 145 65% 52%;
+    --emotion-neutral: 230 15% 60%;
 
-    --glass-bg: 230 25% 12%;
-    --glass-border: 230 20% 22%;
+    --glass-bg: 240 30% 22%;
+    --glass-border: 250 25% 35%;
 
     --font-display: 'Space Grotesk', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 
-    --sidebar-background: 230 25% 8%;
-    --sidebar-foreground: 220 20% 92%;
-    --sidebar-primary: 250 85% 65%;
+    --sidebar-background: 235 35% 16%;
+    --sidebar-foreground: 45 20% 92%;
+    --sidebar-primary: 280 70% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 230 15% 18%;
-    --sidebar-accent-foreground: 220 15% 75%;
-    --sidebar-border: 230 15% 18%;
-    --sidebar-ring: 250 85% 65%;
+    --sidebar-accent: 235 20% 30%;
+    --sidebar-accent-foreground: 45 15% 80%;
+    --sidebar-border: 240 20% 30%;
+    --sidebar-ring: 280 70% 65%;
   }
 }
 
@@ -67,8 +67,10 @@
   }
 
   body {
-    @apply bg-background text-foreground font-bold;
+    @apply text-foreground font-bold;
     font-family: var(--font-display);
+    background: linear-gradient(145deg, hsl(235 35% 18%), hsl(255 30% 14%), hsl(220 35% 16%));
+    min-height: 100vh;
   }
 
   code, .font-mono {
@@ -79,30 +81,30 @@
 @layer components {
   .glass-panel {
     @apply rounded-xl border;
-    background: hsl(var(--glass-bg) / 0.7);
-    border-color: hsl(var(--glass-border) / 0.5);
+    background: linear-gradient(135deg, hsl(var(--glass-bg) / 0.65), hsl(var(--glass-bg) / 0.45));
+    border-color: hsl(var(--glass-border) / 0.4);
     backdrop-filter: blur(24px);
     box-shadow:
-      0 0 40px hsl(var(--glow-primary) / 0.06),
-      0 4px 24px hsl(0 0% 0% / 0.4),
-      inset 0 1px 0 hsl(var(--glass-border) / 0.3);
+      0 0 30px hsl(var(--glow-primary) / 0.05),
+      0 8px 32px hsl(0 0% 0% / 0.25),
+      inset 0 1px 0 hsl(var(--glass-border) / 0.25);
   }
 
   .glass-panel-accent {
     @apply glass-panel;
-    border-color: hsl(var(--glow-accent) / 0.2);
+    border-color: hsl(var(--glow-accent) / 0.25);
     box-shadow:
-      0 0 40px hsl(var(--glow-accent) / 0.08),
-      0 4px 24px hsl(0 0% 0% / 0.4),
-      inset 0 1px 0 hsl(var(--glow-accent) / 0.1);
+      0 0 30px hsl(var(--glow-accent) / 0.07),
+      0 8px 32px hsl(0 0% 0% / 0.25),
+      inset 0 1px 0 hsl(var(--glow-accent) / 0.15);
   }
 
   .glow-text {
-    text-shadow: 0 0 20px hsl(var(--glow-primary) / 0.6), 0 0 40px hsl(var(--glow-primary) / 0.3);
+    text-shadow: 0 0 20px hsl(var(--glow-primary) / 0.6), 0 0 40px hsl(var(--glow-primary) / 0.25);
   }
 
   .glow-text-accent {
-    text-shadow: 0 0 20px hsl(var(--glow-accent) / 0.6), 0 0 40px hsl(var(--glow-accent) / 0.3);
+    text-shadow: 0 0 20px hsl(var(--glow-accent) / 0.6), 0 0 40px hsl(var(--glow-accent) / 0.25);
   }
 
   .glow-dot {
@@ -111,8 +113,8 @@
   }
 
   .neon-border {
-    box-shadow: 0 0 15px hsl(var(--glow-primary) / 0.3), inset 0 0 15px hsl(var(--glow-primary) / 0.05);
-    border-color: hsl(var(--glow-primary) / 0.4);
+    box-shadow: 0 0 15px hsl(var(--glow-primary) / 0.25), inset 0 0 15px hsl(var(--glow-primary) / 0.04);
+    border-color: hsl(var(--glow-primary) / 0.35);
   }
 
   .emotion-angry { color: hsl(var(--emotion-angry)); }
@@ -128,7 +130,7 @@
   .bg-emotion-neutral { background-color: hsl(var(--emotion-neutral) / 0.15); border-color: hsl(var(--emotion-neutral) / 0.3); }
 
   .progress-glow {
-    box-shadow: 0 0 10px hsl(var(--glow-primary) / 0.5), 0 0 20px hsl(var(--glow-primary) / 0.2);
+    box-shadow: 0 0 10px hsl(var(--glow-accent) / 0.5), 0 0 20px hsl(var(--glow-accent) / 0.2);
   }
 
   @keyframes typing-cursor {
