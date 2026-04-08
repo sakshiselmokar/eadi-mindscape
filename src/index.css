@@ -6,11 +6,11 @@
 
 @layer base {
   :root {
-    --background: 235 35% 18%;
-    --foreground: 45 20% 92%;
+    --background: 235 28% 26%;
+    --foreground: 50 30% 96%;
 
-    --card: 240 30% 22%;
-    --card-foreground: 45 20% 92%;
+    --card: 240 25% 30%;
+    --card-foreground: 50 30% 96%;
 
     --popover: 240 30% 22%;
     --popover-foreground: 45 20% 92%;
@@ -21,8 +21,8 @@
     --secondary: 235 25% 28%;
     --secondary-foreground: 45 15% 80%;
 
-    --muted: 235 20% 30%;
-    --muted-foreground: 230 15% 60%;
+    --muted: 235 20% 35%;
+    --muted-foreground: 230 15% 72%;
 
     --accent: 170 80% 50%;
     --accent-foreground: 235 35% 12%;
@@ -44,8 +44,8 @@
     --emotion-satisfied: 145 65% 52%;
     --emotion-neutral: 230 15% 60%;
 
-    --glass-bg: 240 30% 22%;
-    --glass-border: 250 25% 35%;
+    --glass-bg: 240 25% 30%;
+    --glass-border: 250 22% 42%;
 
     --font-display: 'Space Grotesk', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
@@ -69,7 +69,7 @@
   body {
     @apply text-foreground font-bold;
     font-family: var(--font-display);
-    background: linear-gradient(145deg, hsl(235 35% 18%), hsl(255 30% 14%), hsl(220 35% 16%));
+    background: linear-gradient(145deg, hsl(235 28% 26%), hsl(255 25% 22%), hsl(220 28% 24%));
     min-height: 100vh;
   }
 
