@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 
-const API_BASE = "http://localhost:8000";
-
+// const API_BASE = "http://localhost:8000";
+const API_BASE = "https://practiceof-eadi-openenv.hf.space";
 export type Emotion = "angry" | "confused" | "calm" | "satisfied" | "neutral";
 
 export interface TrajectoryStep {
