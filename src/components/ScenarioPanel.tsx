@@ -5,6 +5,7 @@ interface Props {
   message: string;
   emotion: Emotion;
   emoji: string;
+  timeLeft: number;
   context: string;
 }
 
@@ -16,32 +17,36 @@ const emotionLabels: Record<Emotion, string> = {
   neutral: "Neutral",
 };
 
-export default function ScenarioPanel({ message, emotion, emoji, context }: Props) {
+export default function ScenarioPanel({ message, emotion, emoji, timeLeft, context }: Props) {
   return (
-    <div className="glass-panel p-6 h-full flex flex-col gap-4">
+    <div className="glass-panel p-6 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground">Scenario Input</h2>
-        {context && (
+        <div className="flex items-center gap-2">
+          {timeLeft > 0 && (
+            <span className="text-[10px] font-mono px-2 py-1 rounded-full bg-accent/10 text-accent border border-accent/20">
+              ⏱ {timeLeft}s left
+            </span>
+          )}
           <span className="text-[10px] font-mono px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
             {context}
           </span>
-        )}
+        </div>
       </div>
 
       <AnimatePresence mode="wait">
         {message ? (
           <motion.div
-            key="msg"
+            key={message}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
             className="flex-1"
           >
-            <p className="text-foreground text-sm leading-relaxed font-medium">
-              "{message}"
-            </p>
+            <p className="text-foreground text-sm leading-relaxed">"{message}"</p>
           </motion.div>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+          <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm py-4">
             Awaiting scenario...
           </div>
         )}
@@ -49,9 +54,9 @@ export default function ScenarioPanel({ message, emotion, emoji, context }: Prop
 
       {message && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
+          key={emotion}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
           className={`flex items-center gap-2 px-3 py-2 rounded-lg border bg-emotion-${emotion} w-fit`}
         >
           <span className="text-lg">{emoji}</span>
