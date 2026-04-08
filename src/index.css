@@ -6,14 +6,14 @@
 
 @layer base {
   :root {
-    --background: 230 30% 96%;
-    --foreground: 230 40% 15%;
+    --background: 215 20% 88%;
+    --foreground: 0 0% 0%;
 
     --card: 240 25% 99%;
-    --card-foreground: 230 40% 15%;
+    --card-foreground: 0 0% 0%;
 
     --popover: 240 25% 99%;
-    --popover-foreground: 230 40% 15%;
+    --popover-foreground: 0 0% 0%;
 
     --primary: 255 65% 58%;
     --primary-foreground: 0 0% 100%;
@@ -69,7 +69,7 @@
   body {
     @apply text-foreground font-bold;
     font-family: var(--font-display);
-    background: linear-gradient(145deg, hsl(230 30% 96%), hsl(250 25% 94%), hsl(210 30% 95%));
+    background: linear-gradient(145deg, hsl(215 20% 88%), hsl(220 18% 85%), hsl(210 20% 87%));
     min-height: 100vh;
   }
 
